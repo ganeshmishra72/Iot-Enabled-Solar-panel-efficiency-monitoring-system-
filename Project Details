@@ -1,0 +1,37 @@
+IoT-Enabled Solar Panel Efficiency Monitoring System: Arduino UNO Code Description
+
+1. Setup and Initialization:
+
+Initializes the LCD (I2C) and Serial communication for data monitoring.
+
+Defines pins for the current sensor (ACS712) and voltage input.
+
+Configures the ESP32 for Wi-Fi (if IoT is enabled).
+
+
+
+2. Reading Sensor Data:
+
+Reads the solar panel voltage using an analog pin.
+
+Reads the current from the ACS712 sensor using an analog pin.
+
+Calculates power using the formula:
+Power (W) = Voltage × Current
+
+Computes efficiency using a predefined formula:
+Efficiency (%) = (Output Power / Input Power) × 100
+
+
+
+3. Data Display:
+
+Displays voltage, current, and efficiency values on the LCD.
+
+Updates the display every few seconds.
+
+
+
+4. Data Transmission (IoT):
+
+Sends the monitored data (Voltage, Current, Efficiency) to a cloud server (like ThingSpeak or Firebase) using ESP32.
