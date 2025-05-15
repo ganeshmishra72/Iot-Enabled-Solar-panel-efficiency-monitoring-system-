@@ -1,0 +1,81 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <DHT.h>
+
+#define DHTPIN 4          // DHT11 data pin connected to D4
+#define DHTTYPE DHT11     // DHT11 sensor
+#define BUZZER 5          // Buzzer pin connected to D5
+
+DHT dht(DHTPIN, DHTTYPE);
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+int voltagePin = A0;
+int currentPin = A1;
+
+void setup() {
+  lcd.begin();
+  lcd.backlight();
+  Serial.begin(9600);
+  dht.begin();
+  pinMode(BUZZER, OUTPUT);
+  digitalWrite(BUZZER, LOW);  // Buzzer OFF initially
+}
+
+void loop() {
+  // --- Voltage Reading ---
+  int sensorValue = analogRead(voltagePin);
+  float voltage = sensorValue * (5.0 / 1023.0);
+
+  // --- Current Reading ---
+  int currentSensorValue = analogRead(currentPin);
+  float voltageOffset = currentSensorValue * (5.0 / 1023.0);
+  float current = (voltageOffset - 2.5) / 0.185;
+  current = abs(current);
+
+  // --- Power Calculation ---
+  float power = voltage * current;
+
+  // --- Temperature Reading ---
+  float temperature = dht.readTemperature();
+
+  // --- LCD Display ---
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("V:");
+  lcd.print(voltage, 2);
+  lcd.print(" I:");
+  lcd.print(current, 2);
+
+  lcd.setCursor(0, 1);
+  lcd.print("P:");
+  lcd.print(power, 2);
+  lcd.print("W T:");
+  if (isnan(temperature)) {
+    lcd.print("--");
+  } else {
+    lcd.print(temperature, 1);
+  }
+
+  // --- Serial Monitor ---
+  Serial.print("Voltage: ");
+  Serial.print(voltage, 2);
+  Serial.print(" V | Current: ");
+  Serial.print(current, 2);
+  Serial.print(" A | Power: ");
+  Serial.print(power, 2);
+  Serial.print(" W | Temp: ");
+  if (isnan(temperature)) {
+    Serial.println("NaN");
+  } else {
+    Serial.println(temperature);
+  }
+
+  // --- Buzzer Logic ---
+  if (!isnan(temperature) && temperature > 40.0) {
+    digitalWrite(BUZZER, HIGH);  // Turn ON buzzer
+  } else {
+    digitalWrite(BUZZER, LOW);   // Turn OFF buzzer
+  }
+
+  delay(2000);
+}
